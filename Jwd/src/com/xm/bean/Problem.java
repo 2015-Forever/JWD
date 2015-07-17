@@ -1,0 +1,9 @@
+package com.xm.bean;
+
+public class Problem {
+
+	public String time;
+	public String techerName;
+	public String messageState;
+
+}

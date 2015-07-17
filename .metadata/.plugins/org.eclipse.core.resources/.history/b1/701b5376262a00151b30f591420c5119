@@ -1,0 +1,172 @@
+package com.halong.xm.tools;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.halong.jwd.R;
+import com.halong.xm.adapter.CollectAdapter;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.support.v4.util.LruCache;
+import android.widget.ImageView;
+import android.widget.ListView;
+
+public class ImageLoader {
+
+	private ListView mListView;
+	private Set<problemAsyncTask> mTasks;
+
+	// 图片缓存：创建Cache
+	private LruCache<String, Bitmap> mCache;
+
+	public ImageLoader(ListView listView) {
+		mListView = listView;
+		mTasks = new HashSet<ImageLoader.problemAsyncTask>();
+		// 获取最大可用内存
+		int maxMemory = (int) Runtime.getRuntime().maxMemory();
+		int cacheSize = maxMemory / 8;
+		mCache = new LruCache<String, Bitmap>(cacheSize) {
+			@Override
+			protected int sizeOf(String key, Bitmap value) {
+				// 在每次存入缓存时调用
+				return value.getByteCount();
+			}
+		};
+	}
+
+	/**
+	 * 增加图片到缓存
+	 */
+	public void addBitmapToCache(String url, Bitmap bitmap) {
+		if (getBitmapFromCache(url) == null) {
+			mCache.put(url, bitmap);
+		}
+	}
+
+	/**
+	 * 从缓存中获取数据
+	 */
+	public Bitmap getBitmapFromCache(String url) {
+		return mCache.get(url);
+	}
+
+	/**
+	 * 将图片地址解释成Bitmap
+	 * 
+	 * @param urlString
+	 * @return
+	 */
+	public Bitmap getBitmapFromURL(String urlString) {
+		Bitmap bitmap;
+		InputStream is = null;
+		try {
+			URL url = new URL(urlString);
+			HttpURLConnection connection = (HttpURLConnection) url
+					.openConnection(); // 获得连接
+			is = new BufferedInputStream(connection.getInputStream()); // 获取图片数据流
+			bitmap = BitmapFactory.decodeStream(is); // 转化为Bitmap
+			connection.disconnect();
+			return bitmap;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+
+	}
+
+	/**
+	 * 通过AsyncTask实现异步加载图片
+	 * 
+	 * @param imageView
+	 * @param url
+	 */
+	public void showImageByAsyncTask(ImageView imageView, String url) {
+		// 从缓存取出对应的图片
+		Bitmap bitmap = getBitmapFromCache(url);
+		if (bitmap == null) {
+			imageView.setImageResource(R.drawable.ic_launcher);
+		} else {
+			imageView.setImageBitmap(bitmap);
+		}
+	}
+
+	/**
+	 * 用来加载图片
+	 * 
+	 * @param start
+	 *            开始
+	 * @param end
+	 *            结束
+	 */
+	public void loadImages(int start, int end) {
+		for (int i = start; i < end; i++) {
+			String url = CollectAdapter.URLS[i];
+			// 从缓存取出对应的图片
+			Bitmap bitmap = getBitmapFromCache(url);
+			if (bitmap == null) {
+				problemAsyncTask task = new problemAsyncTask(url);
+				task.execute(url);
+				mTasks.add(task);
+			} else {
+				ImageView imageView = (ImageView) mListView
+						.findViewWithTag(url);
+				imageView.setImageBitmap(bitmap);
+			}
+		}
+	}
+
+	public void cancelAllTasks() {
+		if (mTasks != null) {
+			for (problemAsyncTask task : mTasks) {
+				task.cancel(false);
+			}
+		}
+	}
+
+	private class problemAsyncTask extends AsyncTask<String, Void, Bitmap> {
+
+		private String mUrl;
+		
+		public problemAsyncTask(String url) {
+			mUrl = url;
+		}
+
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			String url = params[0];
+			// 从网络获取图片
+			Bitmap bitmap = getBitmapFromURL(url);
+			if (bitmap != null) {
+				// 将不在缓存的图片加入缓存
+				addBitmapToCache(url, bitmap);
+			}
+			return bitmap;
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap bitmap) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(bitmap);
+			ImageView imageView = (ImageView) mListView.findViewWithTag(mUrl);
+			if (imageView != null && bitmap != null) {
+				imageView.setImageBitmap(bitmap);
+			}
+			mTasks.remove(this);
+		}
+
+	}
+
+}

@@ -1,0 +1,129 @@
+package com.xm.jwd.adapter;
+
+import java.util.List;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.AbsListView.OnScrollListener;
+
+public class CollectAdapter extends BaseAdapter implements OnScrollListener{
+	
+	private List<Problem> mList;
+	private LayoutInflater mInflater;
+	private ImageLoader mImageLoader;
+	private int mStart, mEnd;
+	public static String[] URLS;
+	private boolean mFirstIn;
+
+	public CollectAdapter(Context context, List<Problem> data, ListView listView) {
+		mList = data;
+		mInflater = LayoutInflater.from(context);
+		mImageLoader = new ImageLoader(listView);
+		URLS = new String[data.size()];
+		for (int i = 0; i < data.size(); i++) {
+			URLS[i] = data.get(i).main;
+		}
+		mFirstIn = true;
+		listView.setOnScrollListener(this);
+	}
+
+	@Override
+	public int getCount() {
+		return mList.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return mList.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		ViewHolder viewHolder;
+		// 寰楀埌鎺т欢
+		if (convertView == null) {
+			viewHolder = new ViewHolder();
+			convertView = mInflater.inflate(R.layout.item_collect, null);
+			viewHolder.searchImage_iv = (ImageView) convertView
+					.findViewById(R.id.searchImage_iv);
+			viewHolder.time_tv = (TextView) convertView
+					.findViewById(R.id.time_tv);
+			viewHolder.techerName_tv = (TextView) convertView
+					.findViewById(R.id.techername_tv);
+			viewHolder.messageState_tv = (TextView) convertView
+					.findViewById(R.id.messageState_tv);
+			convertView.setTag(viewHolder);
+		} else {
+			viewHolder = (ViewHolder) convertView.getTag();
+		}
+		// 鏄剧ず
+		viewHolder.searchImage_iv.setImageResource(R.drawable.ic_launcher);
+		String url = mList.get(position).main;
+		viewHolder.searchImage_iv.setTag(url);
+		mImageLoader.showImageByAsyncTask(viewHolder.searchImage_iv,
+				mList.get(position).main);
+		viewHolder.time_tv.setText(mList.get(position).time);
+		viewHolder.techerName_tv.setText(mList.get(position).answer);
+		if (mList.get(position).isAnswer) {
+			viewHolder.messageState_tv.setText("宸茶В绛�);			
+		}else {
+			viewHolder.messageState_tv.setText("鏈В绛�);
+		}
+
+		return convertView;
+	}
+
+	/**
+	 * 鍐呴儴绫伙細鏂囪壓寮�
+	 */
+	class ViewHolder {
+		public TextView time_tv ;
+		public TextView techerName_tv ; 
+		public TextView messageState_tv ;
+		public ImageView searchImage_iv ;
+	}
+
+	/**
+	 * 婊戝姩鐘舵�鍒囨崲璋冪敤
+	 */
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		if (scrollState == SCROLL_STATE_IDLE) {
+			// 鍔犺浇鍙椤�
+			mImageLoader.loadImages(mStart, mEnd);
+		} else {
+			// 鍋滄浠诲姟
+			mImageLoader.cancelAllTasks();
+		}
+	}
+
+	/**
+	 * 婊戝姩璋冪敤
+	 * firstVisibleItem锛氱涓�釜鍙鍏冪礌
+	 * visibleItemCount锛氬彲瑙佸厓绱犻暱搴�
+	 */
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		mStart = firstVisibleItem;
+		mEnd = firstVisibleItem + visibleItemCount;
+		// 绗竴娆¤繘鏉ュ姞杞姐�
+		if (mFirstIn && visibleItemCount > 0) {
+			mImageLoader.loadImages(mStart, mEnd);
+			mFirstIn = false;
+		}
+	}
+	
+}

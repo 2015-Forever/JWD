@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#00a6ac"
+        android:gravity="center" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="搜索结果"
+            android:textColor="#ffffff" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/banner" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:background="#FFFFFF"
+        android:gravity="center_vertical" >
+
+        <ImageView
+            android:layout_width="90dp"
+            android:layout_height="25dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/navigation_icon" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/result_lv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawSelectorOnTop="true"
+        android:fastScrollEnabled="false"
+        android:paddingLeft="9dp"
+        android:paddingRight="9dp"
+        android:paddingTop="9dp"
+        android:scrollbars="none" 
+        android:background="#F9F9F9">
+    </ListView>
+
+</LinearLayout>

@@ -1,0 +1,50 @@
+package com.xm.jwd;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.xm.bean.Problem;
+import com.xm.jwd.adapter.CollectAdapter;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+
+public class MytopicActivity extends Activity implements OnItemClickListener{
+	
+	private ListView mListView;
+	private List<Problem> mList;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.fragment_collect);
+		initView();
+	}
+
+	private void initView() {
+		mListView = (ListView) findViewById(R.id.collect_lv);
+		mList = new ArrayList<Problem>();
+		Problem problem;
+		for (int i = 0; i < 10; i++) {
+			problem = new Problem();
+			problem.time = "2015-06-08 15:30" ;
+			problem.techerName = "三胖子" ;
+			problem.messageState = "已解答";
+			mList.add(problem);
+		}
+		CollectAdapter adapter = new CollectAdapter(MytopicActivity.this, mList);
+		mListView.setAdapter(adapter);
+		mListView.setOnItemClickListener(this);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

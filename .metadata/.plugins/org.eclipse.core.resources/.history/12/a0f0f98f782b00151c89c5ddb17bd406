@@ -1,0 +1,53 @@
+package com.xm.jwd;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.xm.bean.Problem;
+import com.xm.jwd.adapter.CollectAdapter;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+
+public class MytopicActivity extends Activity implements OnItemClickListener{
+	
+	private ListView mListView;
+	private List<Problem> mList;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.fragment_collect);
+		initView();
+	}
+
+	private void initView() {
+		mListView = (ListView) findViewById(R.id.collect_lv);
+		mList = new ArrayList<Problem>();
+		Problem problem;
+		for (int i = 0; i < 10; i++) {
+			problem = new Problem();
+			problem.time = "2015-06-08 15:30" ;
+			problem.techerName = "未指定老师" ;
+			problem.messageState = "待解答";
+			mList.add(problem);
+		}
+		CollectAdapter adapter = new CollectAdapter(MytopicActivity.this, mList);
+		mListView.setAdapter(adapter);
+		mListView.setOnItemClickListener(this);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		Intent _Intent = new Intent(MytopicActivity.this, AnswerActivity.class);
+		startActivity(_Intent);
+	}
+
+}

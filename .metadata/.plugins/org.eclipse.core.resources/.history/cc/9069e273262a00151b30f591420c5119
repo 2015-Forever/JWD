@@ -1,0 +1,137 @@
+package com.halong.xm.adapter;
+
+import java.util.List;
+
+import com.halong.bean.Problem;
+import com.halong.jwd.R;
+import com.halong.xm.tools.ImageLoader;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.AbsListView.OnScrollListener;
+/**
+ * 题目收藏listView适配器
+ * @author xianMing
+ * 
+ */
+public class CollectAdapter extends BaseAdapter implements OnScrollListener{
+	
+	private List<Problem> mList;
+	private LayoutInflater mInflater;
+	private ImageLoader mImageLoader;
+	private int mStart, mEnd;
+	public static String[] URLS;
+	private boolean mFirstIn;
+
+	public CollectAdapter(Context context, List<Problem> data, ListView listView) {
+		mList = data;
+		mInflater = LayoutInflater.from(context);
+		mImageLoader = new ImageLoader(listView);
+		URLS = new String[data.size()];
+		for (int i = 0; i < data.size(); i++) {
+			URLS[i] = data.get(i).main;
+		}
+		mFirstIn = true;
+		listView.setOnScrollListener(this);
+	}
+
+	@Override
+	public int getCount() {
+		return mList.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return mList.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		ViewHolder viewHolder;
+		// 得到控件
+		if (convertView == null) {
+			viewHolder = new ViewHolder();
+			convertView = mInflater.inflate(R.layout.item_collect, null);
+			viewHolder.searchImage_iv = (ImageView) convertView
+					.findViewById(R.id.searchImage_iv);
+			viewHolder.time_tv = (TextView) convertView
+					.findViewById(R.id.time_tv);
+			viewHolder.techerName_tv = (TextView) convertView
+					.findViewById(R.id.techername_tv);
+			viewHolder.messageState_tv = (TextView) convertView
+					.findViewById(R.id.messageState_tv);
+			convertView.setTag(viewHolder);
+		} else {
+			viewHolder = (ViewHolder) convertView.getTag();
+		}
+		// 显示
+		viewHolder.searchImage_iv.setImageResource(R.drawable.ic_launcher);
+		String url = mList.get(position).main;
+		viewHolder.searchImage_iv.setTag(url);
+		mImageLoader.showImageByAsyncTask(viewHolder.searchImage_iv,
+				mList.get(position).main);
+		viewHolder.time_tv.setText(mList.get(position).time);
+		viewHolder.techerName_tv.setText(mList.get(position).answer);
+		if (mList.get(position).isAnswer) {
+			viewHolder.messageState_tv.setText("已解答");			
+		}else {
+			viewHolder.messageState_tv.setText("未解答");
+		}
+
+		return convertView;
+	}
+
+	/**
+	 * 内部类：文艺式
+	 */
+	class ViewHolder {
+		public TextView time_tv ;
+		public TextView techerName_tv ; 
+		public TextView messageState_tv ;
+		public ImageView searchImage_iv ;
+	}
+
+	/**
+	 * 滑动状态切换调用
+	 */
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		if (scrollState == SCROLL_STATE_IDLE) {
+			// 加载可见项
+			mImageLoader.loadImages(mStart, mEnd);
+		} else {
+			// 停止任务
+			mImageLoader.cancelAllTasks();
+		}
+	}
+
+	/**
+	 * 滑动调用
+	 * firstVisibleItem：第一个可见元素
+	 * visibleItemCount：可见元素长度 
+	 */
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		mStart = firstVisibleItem;
+		mEnd = firstVisibleItem + visibleItemCount;
+		// 第一次进来加载。
+		if (mFirstIn && visibleItemCount > 0) {
+			mImageLoader.loadImages(mStart, mEnd);
+			mFirstIn = false;
+		}
+	}
+	
+}

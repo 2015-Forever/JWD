@@ -1,0 +1,39 @@
+package com.xm.jwd;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.Window;
+import android.widget.ListView;
+
+import com.xm.bean.Problem;
+import com.xm.jwd.adapter.CollectAdapter;
+
+public class MainActivity extends Activity {
+
+	private ListView mListView;
+	private List<Problem> mList;
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.fragment_collect);
+        initView();
+    }
+
+	private void initView() {
+		mListView = (ListView) findViewById(R.id.collect_lv);
+		mList = new ArrayList<Problem>();
+		for (int i = 0; i < 10; i++) {
+			mList.get(i).time = "2015-06-08 15:30" ;
+			mList.get(i).techerName = "三胖子" ;
+			mList.get(i).messageState = "已解答" ;
+		}
+		CollectAdapter adapter = new CollectAdapter(MainActivity.this, mList);
+		mListView.setAdapter(adapter);
+	}
+    
+}
